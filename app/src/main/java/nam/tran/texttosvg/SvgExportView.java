@@ -5,18 +5,27 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.os.Environment;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class SvgExportView extends View {
 
     public Bitmap mBitmap = null;
     private Canvas mBitmapCanvas = null;
     private Paint mPaint;
-    private Paint mPaintText;
+    private TextPaint mPaintText;
     private Paint mPaintBorder;
+    private Path mPathText;
 
     public SvgExportView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -28,14 +37,11 @@ public class SvgExportView extends View {
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeJoin(Paint.Join.ROUND);
 
-        mPaintText = new Paint();
+        mPaintText = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
         mPaintText.setColor(Color.BLACK);
-        mPaintText.setAntiAlias(true);
-        mPaintText.setStrokeWidth(5);
-        mPaintText.setStyle(Paint.Style.FILL);
-        mPaintText.setStrokeJoin(Paint.Join.ROUND);
-        mPaintText.setStrokeCap(Paint.Cap.ROUND);
-        mPaintText.setTextSize(200);
+        mPaintText.setTextSize(20);
+
+        mPathText = new Path();
 
         mPaintBorder = new Paint();
     }
@@ -44,6 +50,9 @@ public class SvgExportView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         resetDraw();
+        String text = "写真の黒板を編集";
+        mPaintText.getTextPath(text, 0, text.length(), w / 2, h / 2, mPathText);
+        mBitmapCanvas.drawPath(mPathText, mPaintText);
     }
 
     @Override
@@ -59,9 +68,21 @@ public class SvgExportView extends View {
         return whiteBgBitmap;
     }
 
-    private void resetDraw(){
+    public File savebitmap() throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        mBitmap.compress(Bitmap.CompressFormat.PNG, 60, bytes);
+        File f = new File(Environment.getExternalStorageDirectory()
+                + File.separator + "imageText.png");
+        f.createNewFile();
+        FileOutputStream fo = new FileOutputStream(f);
+        fo.write(bytes.toByteArray());
+        fo.close();
+        return f;
+    }
+
+    private void resetDraw() {
         mBitmap = Bitmap.createBitmap(getWidth(), getHeight(),
-            Bitmap.Config.ARGB_8888);
+                Bitmap.Config.ARGB_8888);
         mBitmapCanvas = new Canvas(mBitmap);
     }
 }

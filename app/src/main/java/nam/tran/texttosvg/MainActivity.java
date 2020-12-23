@@ -20,7 +20,7 @@ public class MainActivity extends Activity {
         super.onStop();
 
         try {
-            String svg = ImageTracerAndroid.imageToSVG(view.getBitmap(), null, null);
+            String svg = ImageTracerAndroid.imageToSVG(view.savebitmap().getAbsolutePath(), null, null);
             Log.d("SVGGGGGGGGGGGGG", svg);
         } catch (Exception e) {
             e.printStackTrace();
